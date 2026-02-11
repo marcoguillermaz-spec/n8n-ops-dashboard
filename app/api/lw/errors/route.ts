@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   try {
     const dateFilter =
       days > 0
-        ? ` and ${COL.ts_iso} >= datetime '${daysAgoISO(days)}'`
+        ? ` and ${COL.ts_iso} >= '${daysAgoISO(days)}'`
         : '';
 
     const rows = await gvizQuery({
@@ -44,5 +44,5 @@ export async function GET(req: NextRequest) {
 function daysAgoISO(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 19);
+  return d.toISOString().slice(0, 10);
 }
