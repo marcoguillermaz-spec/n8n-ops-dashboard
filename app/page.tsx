@@ -32,7 +32,7 @@ interface Execution {
 
 const TABS = [
   { id: 'shipping', label: 'Shipping', icon: '📦' },
-  { id: 'lw', label: 'LW Post-Purchase', icon: '🎓' },
+  { id: 'lw', label: 'LearnWorlds', icon: '🎓' },
 ];
 
 const POLL_INTERVAL = 30_000;

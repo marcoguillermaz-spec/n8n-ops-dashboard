@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import LWSummaryCards from './LWSummaryCards';
-import LWErrorTable from './LWErrorTable';
 import LWDetailTable from './LWDetailTable';
+import LWIssuesTable from './LWIssuesTable';
 
 interface ByAction {
-  [action: string]: { ok: number; error: number };
+  [action: string]: { ok: number; warning: number; error: number };
 }
 
 const DAYS_OPTIONS = [
@@ -20,9 +20,10 @@ export default function LWSection() {
   const [days, setDays] = useState(30);
   const [summary, setSummary] = useState<{
     totalProcessed: number;
+    totalWarnings: number;
     totalErrors: number;
     byAction: ByAction;
-  }>({ totalProcessed: 0, totalErrors: 0, byAction: {} });
+  }>({ totalProcessed: 0, totalWarnings: 0, totalErrors: 0, byAction: {} });
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ export default function LWSection() {
       const data = await res.json();
       setSummary(data);
     } catch {
-      setSummary({ totalProcessed: 0, totalErrors: 0, byAction: {} });
+      setSummary({ totalProcessed: 0, totalWarnings: 0, totalErrors: 0, byAction: {} });
     } finally {
       setLoadingSummary(false);
     }
@@ -53,7 +54,7 @@ export default function LWSection() {
     <div className="space-y-8">
       {/* ── Time filter ───────────────────────────── */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">LW • Post-Purchase Automation</h2>
+        <h2 className="text-lg font-semibold">LearnWorlds</h2>
         <div className="flex gap-1 rounded-lg bg-gray-900 p-1">
           {DAYS_OPTIONS.map((opt) => (
             <button
@@ -74,6 +75,7 @@ export default function LWSection() {
       {/* ── Summary cards (clickable) ──────────────── */}
       <LWSummaryCards
         totalProcessed={summary.totalProcessed}
+        totalWarnings={summary.totalWarnings}
         totalErrors={summary.totalErrors}
         byAction={summary.byAction}
         days={days}
@@ -87,12 +89,18 @@ export default function LWSection() {
         <LWDetailTable
           action={selectedAction}
           days={days}
+          actionCounts={
+            summary.byAction[selectedAction] || { ok: 0, warning: 0, error: 0 }
+          }
           onClose={() => setSelectedAction(null)}
         />
       )}
 
-      {/* ── Error table with filters + pagination ──── */}
-      <LWErrorTable days={days} />
+      {/* ── Warning table ──────────────────────────── */}
+      <LWIssuesTable days={days} severity="WARNING" />
+
+      {/* ── Error table ────────────────────────────── */}
+      <LWIssuesTable days={days} severity="ERROR" />
     </div>
   );
 }

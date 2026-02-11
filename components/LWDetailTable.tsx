@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ACTION_LABELS } from '@/lib/lw-config';
+import { ACTION_LABELS, Severity } from '@/lib/lw-config';
 
 interface DetailRow {
   ts: string;
@@ -9,7 +9,7 @@ interface DetailRow {
   orderId: string;
   email: string;
   courseId: string;
-  outcome: string;
+  outcome: Severity;
   statusCode: string;
   errorMessage: string;
 }
@@ -17,11 +17,18 @@ interface DetailRow {
 interface Props {
   action: string;
   days: number;
+  actionCounts: { ok: number; warning: number; error: number };
   onClose: () => void;
 }
 
-export default function LWDetailTable({ action, days, onClose }: Props) {
-  const [outcomeTab, setOutcomeTab] = useState<'OK' | 'ERROR'>('OK');
+const ALL_TABS: { key: Severity; label: string; activeClass: string; countKey: 'ok' | 'warning' | 'error' }[] = [
+  { key: 'OK', label: '✓ Successi', activeClass: 'bg-emerald-600/30 text-emerald-400', countKey: 'ok' },
+  { key: 'WARNING', label: '⚠ Warning', activeClass: 'bg-amber-600/30 text-amber-400', countKey: 'warning' },
+  { key: 'ERROR', label: '✕ Errori', activeClass: 'bg-red-600/30 text-red-400', countKey: 'error' },
+];
+
+export default function LWDetailTable({ action, days, actionCounts, onClose }: Props) {
+  const [outcomeTab, setOutcomeTab] = useState<Severity>('OK');
   const [rows, setRows] = useState<DetailRow[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -63,9 +70,20 @@ export default function LWDetailTable({ action, days, onClose }: Props) {
   function fmtDate(iso: string) {
     if (!iso) return '—';
     const d = new Date(iso);
-    return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }) +
-      ', ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    return (
+      d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }) +
+      ', ' +
+      d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+    );
   }
+
+  const showMsgCol = outcomeTab === 'WARNING' || outcomeTab === 'ERROR';
+  const showCourseCol = action === 'ENROLLMENT';
+
+  // Only show tabs with data (OK always visible)
+  const visibleTabs = ALL_TABS.filter(
+    (tab) => tab.countKey === 'ok' || actionCounts[tab.countKey] > 0,
+  );
 
   return (
     <div className="mt-6">
@@ -73,7 +91,7 @@ export default function LWDetailTable({ action, days, onClose }: Props) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-white">
-            Dettaglio: {label}
+            LearnWorlds — {label}
           </h3>
           <p className="text-sm text-gray-400">{totalCount} risultati</p>
         </div>
@@ -85,21 +103,19 @@ export default function LWDetailTable({ action, days, onClose }: Props) {
         </button>
       </div>
 
-      {/* OK / ERROR tabs */}
+      {/* Dynamic tabs — only show those with data */}
       <div className="flex gap-1 mb-4 bg-gray-800 rounded-lg p-1 w-fit">
-        {(['OK', 'ERROR'] as const).map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
-            key={tab}
-            onClick={() => setOutcomeTab(tab)}
+            key={tab.key}
+            onClick={() => setOutcomeTab(tab.key)}
             className={`px-4 py-1.5 text-sm rounded-md transition-colors ${
-              outcomeTab === tab
-                ? tab === 'OK'
-                  ? 'bg-emerald-600/30 text-emerald-400'
-                  : 'bg-red-600/30 text-red-400'
+              outcomeTab === tab.key
+                ? tab.activeClass
                 : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            {tab === 'OK' ? '✓ Successi' : '✕ Errori'}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -108,7 +124,9 @@ export default function LWDetailTable({ action, days, onClose }: Props) {
       {loading ? (
         <div className="text-gray-400 py-8 text-center">Caricamento…</div>
       ) : rows.length === 0 ? (
-        <div className="text-gray-500 py-8 text-center">Nessun risultato nel periodo selezionato</div>
+        <div className="text-gray-500 py-8 text-center">
+          Nessun risultato nel periodo selezionato
+        </div>
       ) : (
         <>
           <div className="overflow-x-auto rounded-lg border border-gray-700">
@@ -118,19 +136,37 @@ export default function LWDetailTable({ action, days, onClose }: Props) {
                   <th className="px-4 py-3">Data</th>
                   <th className="px-4 py-3">Ordine</th>
                   <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Corso / Risorsa</th>
-                  {outcomeTab === 'ERROR' && <th className="px-4 py-3">Errore</th>}
+                  {showCourseCol && <th className="px-4 py-3">Corso / Risorsa</th>}
+                  {showMsgCol && <th className="px-4 py-3">Messaggio</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/50">
                 {rows.map((r, i) => (
                   <tr key={i} className="hover:bg-gray-800/30">
-                    <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{fmtDate(r.ts)}</td>
-                    <td className="px-4 py-3 text-blue-400 font-mono text-xs">#{r.orderId}</td>
-                    <td className="px-4 py-3 text-gray-300 truncate max-w-[200px]">{r.email}</td>
-                    <td className="px-4 py-3 text-gray-300 truncate max-w-[200px]">{r.courseId}</td>
-                    {outcomeTab === 'ERROR' && (
-                      <td className="px-4 py-3 text-red-400 truncate max-w-[250px]">{r.errorMessage}</td>
+                    <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+                      {fmtDate(r.ts)}
+                    </td>
+                    <td className="px-4 py-3 text-blue-400 font-mono text-xs">
+                      #{r.orderId}
+                    </td>
+                    <td className="px-4 py-3 text-gray-300 truncate max-w-[200px]">
+                      {r.email}
+                    </td>
+                    {showCourseCol && (
+                      <td className="px-4 py-3 text-gray-300 truncate max-w-[200px]">
+                        {r.courseId}
+                      </td>
+                    )}
+                    {showMsgCol && (
+                      <td
+                        className={`px-4 py-3 truncate max-w-[250px] ${
+                          outcomeTab === 'WARNING'
+                            ? 'text-amber-400'
+                            : 'text-red-400'
+                        }`}
+                      >
+                        {r.errorMessage}
+                      </td>
                     )}
                   </tr>
                 ))}

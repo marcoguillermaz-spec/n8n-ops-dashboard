@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gvizQuery } from '@/lib/gsheet';
-import { LW_SHEET_ID, COL } from '@/lib/lw-config';
+import {
+  LW_SHEET_ID,
+  COL,
+  gvizWarningContains,
+  gvizNotWarning,
+  classifyOutcome,
+} from '@/lib/lw-config';
 
 /**
- * GET /api/lw/detail?action=USER_CREATED&outcome=OK&days=30&page=1&limit=30
+ * GET /api/lw/detail?action=ENROLLMENT&outcome=WARNING&days=30&page=1&limit=30
  *
- * Returns paginated rows for a specific action, optionally filtered by outcome.
+ * Returns paginated rows for a specific action, filtered by reclassified outcome.
+ *
+ * outcome param mapping:
+ *   OK      → sheet outcome = 'OK'
+ *   WARNING → sheet outcome = 'ERROR' AND error_message matches warning patterns
+ *   ERROR   → sheet outcome = 'ERROR' AND error_message does NOT match warning patterns
  */
 export async function GET(req: NextRequest) {
   const action = req.nextUrl.searchParams.get('action');
-  const outcome = req.nextUrl.searchParams.get('outcome'); // OK | ERROR | null (both)
+  const outcome = req.nextUrl.searchParams.get('outcome'); // OK | WARNING | ERROR | null
   const days = parseInt(req.nextUrl.searchParams.get('days') || '30', 10);
   const page = parseInt(req.nextUrl.searchParams.get('page') || '1', 10);
   const limit = parseInt(req.nextUrl.searchParams.get('limit') || '30', 10);
@@ -21,24 +32,32 @@ export async function GET(req: NextRequest) {
   try {
     const filters: string[] = [`${COL.action} = '${action}'`];
 
-    if (outcome) {
-      filters.push(`${COL.outcome} = '${outcome}'`);
-    }
-
     if (days > 0) {
       filters.push(`${COL.ts_iso} >= '${daysAgo(days)}'`);
     }
 
-    const where = filters.length > 0 ? ` where ${filters.join(' and ')}` : '';
+    // Map the reclassified outcome to gviz filters
+    if (outcome === 'OK') {
+      filters.push(`${COL.outcome} = 'OK'`);
+    } else if (outcome === 'WARNING') {
+      filters.push(`${COL.outcome} = 'ERROR'`);
+      filters.push(`(${gvizWarningContains()})`);
+    } else if (outcome === 'ERROR') {
+      filters.push(`${COL.outcome} = 'ERROR'`);
+      filters.push(gvizNotWarning());
+    }
+    // If outcome is null/undefined → return all rows (no outcome filter)
 
-    // First get total count
+    const where = ` where ${filters.join(' and ')}`;
+
+    // Total count
     const countRows = await gvizQuery({
       sheetId: LW_SHEET_ID,
       query: `select count(${COL.action})${where}`,
     });
     const totalCount = countRows.length > 1 ? parseInt(countRows[1][0], 10) || 0 : 0;
 
-    // Then get paginated data
+    // Paginated data
     const offset = (page - 1) * limit;
     const dataRows = await gvizQuery({
       sheetId: LW_SHEET_ID,
@@ -51,7 +70,7 @@ export async function GET(req: NextRequest) {
       orderId: r[2],
       email: r[3],
       courseId: r[4],
-      outcome: r[5],
+      outcome: classifyOutcome(r[5] || '', r[7] || ''),
       statusCode: r[6],
       errorMessage: r[7],
     }));
