@@ -34,3 +34,26 @@ export const SUMMARY_CARDS = [
   { action: 'TAGS_UPDATED', label: 'Tag assegnati', icon: '🏷️' },
   { action: 'ENROLLMENT', label: 'Enrollment', icon: '📚' },
 ] as const;
+
+/**
+ * Error type classification.
+ * Maps patterns found in error_message (col K) to human-readable labels.
+ */
+export const ERROR_TYPES: { key: string; pattern: string; label: string; code: number }[] = [
+  { key: 'already_owned', pattern: 'Product is already owned', label: 'Prodotto già posseduto', code: 422 },
+  { key: 'not_found', pattern: 'Product not found', label: 'Prodotto non trovato', code: 404 },
+];
+
+/** Classify an error_message string into a known type key, or 'other' */
+export function classifyError(errorMessage: string): string {
+  for (const t of ERROR_TYPES) {
+    if (errorMessage.includes(t.pattern)) return t.key;
+  }
+  return 'other';
+}
+
+/** Get label for an error type key */
+export function errorTypeLabel(key: string): string {
+  const found = ERROR_TYPES.find((t) => t.key === key);
+  return found ? `${found.code} — ${found.label}` : 'Altro';
+}
