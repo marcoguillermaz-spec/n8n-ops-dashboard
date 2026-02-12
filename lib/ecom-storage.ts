@@ -81,15 +81,31 @@ export interface ValidationStats {
 
 /* ──────────────────────────────────────────────────────────
  * In-memory store for validation results
+ *
+ * Attached to globalThis so the Map survives module re-evaluation
+ * (HMR, Turbopack, different route handlers sharing state).
  * ────────────────────────────────────────────────────────── */
 
-const results = new Map<number, ValidationResult>();
-let nextId = 1;
+const g = globalThis as typeof globalThis & {
+  __ecomResults?: Map<number, ValidationResult>;
+  __ecomNextId?: number;
+};
+
+if (!g.__ecomResults) g.__ecomResults = new Map<number, ValidationResult>();
+if (!g.__ecomNextId) g.__ecomNextId = 1;
+
+const results = g.__ecomResults;
+
+function getNextId() {
+  const id = g.__ecomNextId!;
+  g.__ecomNextId = id + 1;
+  return id;
+}
 
 export function createValidationResult(
   data: InsertValidationResult,
 ): ValidationResult {
-  const id = nextId++;
+  const id = getNextId();
   const row: ValidationResult = {
     id,
     sku: data.sku,

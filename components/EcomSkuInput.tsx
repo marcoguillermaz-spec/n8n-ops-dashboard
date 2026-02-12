@@ -90,10 +90,7 @@ export default function EcomSkuInput({
             Inserisci gli SKU per validare le configurazioni dei sub-prodotti
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <EcomValidationGuide />
-          <span className="text-xs text-gray-500">Config via .env.local</span>
-        </div>
+        <EcomValidationGuide />
       </div>
 
       {/* Tabs */}
