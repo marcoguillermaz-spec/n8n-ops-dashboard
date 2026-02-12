@@ -18,7 +18,6 @@ interface Props {
   action: string;
   days: number;
   actionCounts: { ok: number; warning: number; error: number };
-  onClose: () => void;
 }
 
 const ALL_TABS: { key: Severity; label: string; activeClass: string; countKey: 'ok' | 'warning' | 'error' }[] = [
@@ -27,13 +26,31 @@ const ALL_TABS: { key: Severity; label: string; activeClass: string; countKey: '
   { key: 'ERROR', label: '✕ Errori', activeClass: 'bg-red-600/30 text-red-400', countKey: 'error' },
 ];
 
-export default function LWDetailTable({ action, days, actionCounts, onClose }: Props) {
+/** Overlay spinner */
+function Spinner() {
+  return (
+    <div className="flex items-center justify-center py-16">
+      <svg className="h-8 w-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      </svg>
+    </div>
+  );
+}
+
+export default function LWDetailTable({ action, days, actionCounts }: Props) {
   const [outcomeTab, setOutcomeTab] = useState<Severity>('OK');
   const [rows, setRows] = useState<DetailRow[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Reset outcomeTab to OK whenever the selected action changes
+  useEffect(() => {
+    setOutcomeTab('OK');
+    setPage(1);
+  }, [action]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -88,19 +105,11 @@ export default function LWDetailTable({ action, days, actionCounts, onClose }: P
   return (
     <div className="mt-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-white">
-            LearnWorlds — {label}
-          </h3>
-          <p className="text-sm text-gray-400">{totalCount} risultati</p>
-        </div>
-        <button
-          onClick={onClose}
-          className="px-3 py-1.5 text-sm text-gray-400 hover:text-white border border-gray-600 rounded-lg hover:border-gray-400 transition-colors"
-        >
-          ✕ Chiudi
-        </button>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-white">
+          LearnWorlds — {label}
+        </h3>
+        <p className="text-sm text-gray-400">{totalCount} risultati</p>
       </div>
 
       {/* Dynamic tabs — only show those with data */}
@@ -122,7 +131,7 @@ export default function LWDetailTable({ action, days, actionCounts, onClose }: P
 
       {/* Table */}
       {loading ? (
-        <div className="text-gray-400 py-8 text-center">Caricamento…</div>
+        <Spinner />
       ) : rows.length === 0 ? (
         <div className="text-gray-500 py-8 text-center">
           Nessun risultato nel periodo selezionato

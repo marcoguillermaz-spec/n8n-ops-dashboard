@@ -12,26 +12,27 @@ import {
 } from '@/lib/lw-config';
 
 /**
- * GET /api/lw/issues?severity=WARNING&days=30&page=1&limit=30&issueType=already_owned
+ * GET /api/lw/issues?severity=ALL&days=30&page=1&limit=30
  *
- * Unified endpoint for both warnings and errors.
+ * Unified endpoint for warnings and errors.
  *
- * severity (required): 'WARNING' | 'ERROR'
+ * severity (required): 'ALL' | 'WARNING' | 'ERROR'
+ *   ALL     → all sheet outcome = 'ERROR' rows (both warnings and real errors)
  *   WARNING → sheet outcome = 'ERROR' AND error_message matches warning patterns
  *   ERROR   → sheet outcome = 'ERROR' AND error_message does NOT match warning patterns
  *
- * issueType (optional): key from WARNING_TYPES or ERROR_TYPES, or 'other' for unclassified errors
+ * Returns macroBreakdown: { all, WARNING, ERROR } alongside paginated data.
+ * Each row includes a `severity` field ('WARNING' | 'ERROR') for per-row colouring.
  */
 export async function GET(req: NextRequest) {
   const severity = req.nextUrl.searchParams.get('severity');
   const days = parseInt(req.nextUrl.searchParams.get('days') || '30', 10);
   const page = parseInt(req.nextUrl.searchParams.get('page') || '1', 10);
   const limit = parseInt(req.nextUrl.searchParams.get('limit') || '30', 10);
-  const issueType = req.nextUrl.searchParams.get('issueType');
 
-  if (!severity || (severity !== 'WARNING' && severity !== 'ERROR')) {
+  if (!severity || !['ALL', 'WARNING', 'ERROR'].includes(severity)) {
     return NextResponse.json(
-      { error: 'severity parameter required (WARNING or ERROR)' },
+      { error: 'severity parameter required (ALL, WARNING or ERROR)' },
       { status: 400 },
     );
   }
@@ -43,25 +44,13 @@ export async function GET(req: NextRequest) {
       filters.push(`${COL.ts_iso} >= '${daysAgo(days)}'`);
     }
 
-    // Severity filter
+    // Severity filter (ALL = no extra filter, includes both warnings and real errors)
     if (severity === 'WARNING') {
       filters.push(`(${gvizWarningContains()})`);
-    } else {
+    } else if (severity === 'ERROR') {
       filters.push(gvizNotWarning());
     }
-
-    // Issue type filter (within severity)
-    if (issueType) {
-      const types = severity === 'WARNING' ? WARNING_TYPES : ERROR_TYPES;
-      const found = types.find((t) => t.key === issueType);
-      if (found) {
-        filters.push(`${COL.error_message} contains '${found.pattern}'`);
-      } else if (issueType === 'other' && severity === 'ERROR') {
-        for (const t of ERROR_TYPES) {
-          filters.push(`not ${COL.error_message} contains '${t.pattern}'`);
-        }
-      }
-    }
+    // severity === 'ALL' → no additional filter
 
     const where = ` where ${filters.join(' and ')}`;
 
@@ -82,12 +71,10 @@ export async function GET(req: NextRequest) {
 
     const issues = dataRows.slice(1).map((r) => {
       const msg = r[6] || '';
-      let typeKey: string;
-      if (severity === 'WARNING') {
-        typeKey = classifyWarning(msg) || 'other';
-      } else {
-        typeKey = classifyError(msg);
-      }
+      const isWarning = classifyWarning(msg) !== null;
+      const typeKey = isWarning
+        ? classifyWarning(msg) || 'other'
+        : classifyError(msg);
       return {
         ts: r[0],
         action: r[1],
@@ -97,38 +84,38 @@ export async function GET(req: NextRequest) {
         statusCode: r[5],
         errorMessage: r[6],
         issueType: typeKey,
+        severity: isWarning ? 'WARNING' : 'ERROR',
       };
     });
 
-    // Breakdown by issue type (for filter pill counts)
-    // Uses severity base filter only (no issueType filter)
+    // ── Macro breakdown (always computed, regardless of current severity filter) ──
+    // Base = all ERROR outcome rows in the time window
     const baseFilters: string[] = [`${COL.outcome} = 'ERROR'`];
     if (days > 0) baseFilters.push(`${COL.ts_iso} >= '${daysAgo(days)}'`);
-    if (severity === 'WARNING') {
-      baseFilters.push(`(${gvizWarningContains()})`);
-    } else {
-      baseFilters.push(gvizNotWarning());
-    }
     const baseWhere = ` where ${baseFilters.join(' and ')}`;
 
-    const breakdownRows = await gvizQuery({
+    // Count all issues
+    const allCountRows = await gvizQuery({
       sheetId: LW_SHEET_ID,
-      query: `select ${COL.error_message}, count(${COL.error_message})${baseWhere} group by ${COL.error_message}`,
+      query: `select count(${COL.action})${baseWhere}`,
     });
+    const allCount =
+      allCountRows.length > 1 ? parseInt(allCountRows[1][0], 10) || 0 : 0;
 
-    const breakdown: Record<string, number> = { all: 0 };
-    for (let i = 1; i < breakdownRows.length; i++) {
-      const [msg, cnt] = breakdownRows[i];
-      const count = parseInt(cnt, 10) || 0;
-      let key: string;
-      if (severity === 'WARNING') {
-        key = classifyWarning(msg || '') || 'other';
-      } else {
-        key = classifyError(msg || '');
-      }
-      breakdown[key] = (breakdown[key] || 0) + count;
-      breakdown.all += count;
-    }
+    // Count warnings
+    const warnWhere = `${baseWhere} and (${gvizWarningContains()})`;
+    const warnCountRows = await gvizQuery({
+      sheetId: LW_SHEET_ID,
+      query: `select count(${COL.action})${warnWhere}`,
+    });
+    const warnCount =
+      warnCountRows.length > 1 ? parseInt(warnCountRows[1][0], 10) || 0 : 0;
+
+    const macroBreakdown = {
+      all: allCount,
+      WARNING: warnCount,
+      ERROR: allCount - warnCount,
+    };
 
     return NextResponse.json({
       issues,
@@ -136,7 +123,7 @@ export async function GET(req: NextRequest) {
       limit,
       totalCount,
       totalPages: Math.ceil(totalCount / limit),
-      breakdown,
+      macroBreakdown,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';

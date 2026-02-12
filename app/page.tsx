@@ -5,6 +5,7 @@ import TabNav from '@/components/TabNav';
 import WorkflowCard from '@/components/WorkflowCard';
 import ExecutionTable from '@/components/ExecutionTable';
 import LWSection from '@/components/LWSection';
+import EcomSection from '@/components/EcomSection';
 
 /* ── Types ───────────────────────────────────────── */
 
@@ -33,6 +34,7 @@ interface Execution {
 const TABS = [
   { id: 'shipping', label: 'Shipping', icon: '📦' },
   { id: 'lw', label: 'LearnWorlds', icon: '🎓' },
+  { id: 'ecom', label: 'eCommerce Utils', icon: '🛒' },
 ];
 
 const POLL_INTERVAL = 30_000;
@@ -216,6 +218,9 @@ export default function DashboardPage() {
 
       {/* ━━ LW POST-PURCHASE TAB ━━━━━━━━━━━━━━━━━ */}
       {activeTab === 'lw' && <LWSection />}
+
+      {/* ━━ ECOMMERCE UTILS TAB ━━━━━━━━━━━━━━━━━ */}
+      {activeTab === 'ecom' && <EcomSection />}
     </div>
   );
 }
