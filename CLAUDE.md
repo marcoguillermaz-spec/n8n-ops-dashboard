@@ -9,12 +9,13 @@ Dashboard interna per il monitoraggio e la gestione dei workflow n8n operativi, 
 - **API Client**: Axios per BigCommerce API v3
 - **Validation**: Zod per input schema
 - **Storage**: In-memory Map con `globalThis` singleton (no database)
-- **Auth**: Cookie httpOnly con password semplice
+- **Auth**: Supabase Auth con Google SSO (solo @testbusters.it), PKCE flow, @supabase/ssr
 - **Theme**: Dark mode only
 
 ## Architecture Decisions
 - **Tailwind puro**: tutti i componenti usano classi Tailwind dirette, nessuna libreria UI
 - **In-memory storage**: risultati validazione sono transienti (Map su `globalThis` per sopravvivere a HMR/Turbopack)
+- **Supabase Auth**: Google OAuth via `@supabase/ssr`, PKCE flow con `exchangeCodeForSession`, domain check `@testbusters.it` nel middleware
 - **API credentials via `.env.local`**: nessun pannello API Config nel frontend. Le credenziali BigCommerce e LearnWorlds si configurano solo via environment variables
 - **App Router**: tutte le API routes in `app/api/`, nessun pages router
 - **Sub-tab pattern**: le sezioni principali (LW, eCommerce) hanno sub-tab interni gestiti con useState
@@ -22,8 +23,8 @@ Dashboard interna per il monitoraggio e la gestione dei workflow n8n operativi, 
 ## Project Structure
 ```
 app/
+  auth/callback/route.ts                 → OAuth callback (PKCE code exchange)
   api/
-    auth/route.ts                        → Login/logout
     workflows/route.ts                   → GET stato workflow n8n
     workflows/toggle/route.ts            → POST attiva/disattiva workflow
     executions/route.ts                  → GET storico esecuzioni
@@ -58,6 +59,8 @@ components/
   EcomVoucherSection.tsx    → Form creazione voucher LearnWorlds
 
 lib/
+  supabase/client.ts   → Browser Supabase client (createBrowserClient)
+  supabase/server.ts   → Server Supabase client (createServerClient + cookies())
   n8n.ts               → Client API n8n
   workflows.ts         → Registry workflow BRT
   gsheet.ts            → Client Google Sheet (gviz/tq)
@@ -66,7 +69,7 @@ lib/
   ecom-storage.ts      → In-memory storage risultati + tipi (globalThis singleton)
   ecom-schemas.ts      → Schema Zod per voucher
 
-middleware.ts          → Auth middleware
+middleware.ts          → Supabase Auth middleware (getUser + domain check)
 ```
 
 ## Sections
@@ -97,10 +100,10 @@ Creazione coupon LearnWorlds con validazione Zod.
 
 ## Environment Variables
 ```
+NEXT_PUBLIC_SUPABASE_URL       → Supabase project URL (https://<ref>.supabase.co)
+NEXT_PUBLIC_SUPABASE_ANON_KEY  → Supabase anon key
 N8N_BASE_URL        → URL istanza n8n
 N8N_API_KEY         → API key n8n
-DASHBOARD_PASSWORD  → Password accesso dashboard
-AUTH_SECRET         → Stringa segreta cookie (min 32 chars)
 LW_SHEET_ID        → ID Google Sheet log post-purchase LW
 BC_API_ENDPOINT     → BigCommerce API base URL (es. https://api.bigcommerce.com/stores)
 BC_STORE_HASH       → Store hash BigCommerce
@@ -125,6 +128,9 @@ LW_SCHOOL_URL       → URL scuola LearnWorlds
 - Images via query param: `?include=images` su endpoint prodotti
 - HTML stripping per descrizione: `.replace(/<[^>]*>/g, '').trim()`
 - Sub-tab navigation con `useState<SubTab>` pattern (sia in LWSection che EcomSection)
+- Supabase SSR: `getAll`/`setAll` cookie pattern per browser↔server sync
+- Middleware: `getUser()` (mai `getSession()`) per validare token server-side
+- Domain check `@testbusters.it` nel middleware con signOut + redirect su mismatch
 
 ## Pending / Planned Features
 - Dashboard analytics con statistiche aggregate validazione

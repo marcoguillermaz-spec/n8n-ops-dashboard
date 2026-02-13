@@ -6,6 +6,7 @@ import WorkflowCard from '@/components/WorkflowCard';
 import ExecutionTable from '@/components/ExecutionTable';
 import LWSection from '@/components/LWSection';
 import EcomSection from '@/components/EcomSection';
+import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ───────────────────────────────────────── */
 
@@ -114,7 +115,8 @@ export default function DashboardPage() {
 
   // ── Logout ─────────────────────────────────────
   async function handleLogout() {
-    await fetch('/api/auth', { method: 'DELETE' });
+    const supabase = createClient();
+    await supabase.auth.signOut();
     window.location.href = '/login';
   }
 
