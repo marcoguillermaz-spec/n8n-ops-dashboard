@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
+function getOrigin(request: NextRequest): string {
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'https';
+  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
+  return request.nextUrl.origin;
+}
+
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
-  const code = searchParams.get('code');
+  const code = request.nextUrl.searchParams.get('code');
+  const origin = getOrigin(request);
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=auth`);

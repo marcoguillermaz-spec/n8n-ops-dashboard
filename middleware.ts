@@ -3,6 +3,13 @@ import { createServerClient } from '@supabase/ssr';
 
 const PUBLIC_ROUTES = ['/login', '/auth/callback', '/_next', '/favicon.ico'];
 
+function getBaseUrl(request: NextRequest): string {
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'https';
+  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
+  return request.nextUrl.origin;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -43,17 +50,16 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+    const baseUrl = getBaseUrl(request);
+    return NextResponse.redirect(`${baseUrl}/login`);
   }
 
   // Domain restriction enforcement
   const email = user.email ?? '';
   if (!email.endsWith('@testbusters.it')) {
     await supabase.auth.signOut();
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('error', 'domain');
-    return NextResponse.redirect(loginUrl);
+    const baseUrl = getBaseUrl(request);
+    return NextResponse.redirect(`${baseUrl}/login?error=domain`);
   }
 
   return supabaseResponse;
