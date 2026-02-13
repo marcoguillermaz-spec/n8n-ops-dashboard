@@ -15,7 +15,7 @@ const SUB_TABS = [
   { id: 'coupon', label: 'Creazione Coupon', icon: '🎟️' },
   { id: 'voucher', label: 'Coupon ordine', icon: '🎁' },
   { id: 'validation', label: 'Validazione SKU', icon: '🔍' },
-  { id: 'bundle-lookup', label: 'Ricerca Bundle', icon: '📦' },
+  { id: 'bundle-lookup', label: 'Ricerca inversa SKU Bundle', icon: '📦' },
 ] as const;
 
 type SubTab = (typeof SUB_TABS)[number]['id'];
