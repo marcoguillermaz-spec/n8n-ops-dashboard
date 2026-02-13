@@ -32,7 +32,7 @@ interface ApiCallLog {
 
 /* ── Helpers ───────────────────────────────────────────── */
 
-function bcHeaders(apiKey: string) {
+export function bcHeaders(apiKey: string) {
   return {
     'X-Auth-Token': apiKey,
     Accept: 'application/json',
@@ -42,7 +42,7 @@ function bcHeaders(apiKey: string) {
 
 /* ── Purchasability check (shared) ───────────────────── */
 
-function checkPurchasability(product: any): ProductCheck {
+export function checkPurchasability(product: any): ProductCheck {
   if (product.availability === 'available') {
     return { name: 'Purchasability', status: 'pass', value: 'Disponibile' };
   }

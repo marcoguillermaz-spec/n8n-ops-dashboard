@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Operations Dashboard',
-  description: 'Shipping BRT + LW Post-Purchase — Monitoring & gestione workflow n8n',
+  description: 'Ecommerce Utils & n8n Workflow Management',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

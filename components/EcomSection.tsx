@@ -5,13 +5,17 @@ import EcomSkuInput from './EcomSkuInput';
 import EcomValidationResults from './EcomValidationResults';
 import EcomDetailModal from './EcomDetailModal';
 import EcomVoucherSection from './EcomVoucherSection';
+import EcomCouponSection from './EcomCouponSection';
+import EcomBundleLookup from './EcomBundleLookup';
 import type { ValidationResult } from '@/lib/ecom-storage';
 
 /* ── Sub-tabs ─────────────────────────────────────── */
 
 const SUB_TABS = [
-  { id: 'validation', label: 'SKU Validation', icon: '🔍' },
-  { id: 'voucher', label: 'Voucher', icon: '🎁' },
+  { id: 'coupon', label: 'Creazione Coupon', icon: '🎟️' },
+  { id: 'voucher', label: 'Coupon ordine', icon: '🎁' },
+  { id: 'validation', label: 'Validazione SKU', icon: '🔍' },
+  { id: 'bundle-lookup', label: 'Ricerca Bundle', icon: '📦' },
 ] as const;
 
 type SubTab = (typeof SUB_TABS)[number]['id'];
@@ -29,7 +33,7 @@ function OverlaySpinner() {
 }
 
 export default function EcomSection() {
-  const [subTab, setSubTab] = useState<SubTab>('validation');
+  const [subTab, setSubTab] = useState<SubTab>('coupon');
 
   // ── SKU Validation state ─────────────────────────
   const [isValidating, setIsValidating] = useState(false);
@@ -117,6 +121,12 @@ export default function EcomSection() {
 
       {/* ━━ VOUCHER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       {subTab === 'voucher' && <EcomVoucherSection />}
+
+      {/* ━━ COUPON ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {subTab === 'coupon' && <EcomCouponSection />}
+
+      {/* ━━ BUNDLE LOOKUP ━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {subTab === 'bundle-lookup' && <EcomBundleLookup />}
     </div>
   );
 }

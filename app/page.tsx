@@ -32,9 +32,9 @@ interface Execution {
 /* ── Constants ───────────────────────────────────── */
 
 const TABS = [
+  { id: 'ecom', label: 'eCommerce Utils', icon: '🛒' },
   { id: 'shipping', label: 'Shipping', icon: '📦' },
   { id: 'lw', label: 'LearnWorlds', icon: '🎓' },
-  { id: 'ecom', label: 'eCommerce Utils', icon: '🛒' },
 ];
 
 const POLL_INTERVAL = 30_000;
@@ -42,7 +42,7 @@ const POLL_INTERVAL = 30_000;
 /* ── Page ────────────────────────────────────────── */
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('shipping');
+  const [activeTab, setActiveTab] = useState('ecom');
 
   // ── Shipping state ─────────────────────────────
   const [workflows, setWorkflows] = useState<WorkflowState[]>([]);
@@ -129,7 +129,7 @@ export default function DashboardPage() {
             Operations Dashboard
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Monitoring &amp; gestione workflow n8n
+            Ecommerce Utils &amp; n8n Workflow Management
           </p>
         </div>
         <div className="flex items-center gap-4">
