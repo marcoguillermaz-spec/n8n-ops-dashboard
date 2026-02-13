@@ -40,7 +40,7 @@ Creazione coupon LearnWorlds con validazione Zod dei parametri.
 
 ## Funzionalità trasversali
 - **Auto-refresh** ogni 30 secondi
-- **Autenticazione** con password semplice (cookie httpOnly)
+- **Autenticazione** con Google SSO via Supabase (solo account @testbusters.it)
 - **Dark theme** con Tailwind CSS puro (no shadcn/ui)
 - **Tab navigation** tra le sezioni
 - **In-memory storage** per risultati validazione (transiente)
@@ -71,8 +71,8 @@ Apri [http://localhost:3000](http://localhost:3000).
 | ------------------- | ---------------------------------------------- |
 | `N8N_BASE_URL`      | URL della tua istanza n8n (es. `https://n8n.tuodominio.com`) |
 | `N8N_API_KEY`       | API key n8n (Settings → API → Create API Key)  |
-| `DASHBOARD_PASSWORD`| Password di accesso alla dashboard             |
-| `AUTH_SECRET`       | Stringa segreta per firmare il cookie (min 32 chars) |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL progetto Supabase (`https://<ref>.supabase.co`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key Supabase                         |
 | `LW_SHEET_ID`      | ID del Google Sheet con i log post-purchase LW |
 | `BC_STORE_HASH`    | Store hash BigCommerce (es. `abc123`)          |
 | `BC_ACCESS_TOKEN`  | Access token API BigCommerce (V3 Catalog)      |
@@ -96,8 +96,8 @@ Compatibile con Vercel, Docker, Railway, Fly.io e qualsiasi hosting Node.js.
 
 ```
 ├── app/
+│   ├── auth/callback/route.ts                   # OAuth callback (PKCE code exchange)
 │   ├── api/
-│   │   ├── auth/route.ts                        # Login/logout
 │   │   ├── workflows/route.ts                   # GET stato workflow
 │   │   ├── workflows/toggle/route.ts            # POST attiva/disattiva
 │   │   ├── executions/route.ts                  # GET storico esecuzioni
@@ -130,6 +130,8 @@ Compatibile con Vercel, Docker, Railway, Fly.io e qualsiasi hosting Node.js.
 │   ├── EcomValidationGuide.tsx                  # CTA + dialog guida controlli
 │   └── EcomVoucherSection.tsx                   # Form creazione voucher LW
 ├── lib/
+│   ├── supabase/client.ts                       # Browser Supabase client
+│   ├── supabase/server.ts                       # Server Supabase client
 │   ├── n8n.ts                                   # Client API n8n
 │   ├── workflows.ts                             # Registry workflow BRT
 │   ├── gsheet.ts                                # Client Google Sheet (gviz/tq)
@@ -137,7 +139,7 @@ Compatibile con Vercel, Docker, Railway, Fly.io e qualsiasi hosting Node.js.
 │   ├── ecom-validation.ts                       # Engine validazione BigCommerce (11+8 check)
 │   ├── ecom-storage.ts                          # In-memory storage risultati + tipi
 │   └── ecom-schemas.ts                          # Schema Zod per voucher
-└── middleware.ts                                 # Auth middleware
+└── middleware.ts                                 # Supabase Auth middleware (getUser + domain check)
 ```
 
 ## Tech stack
@@ -146,4 +148,5 @@ Compatibile con Vercel, Docker, Railway, Fly.io e qualsiasi hosting Node.js.
 - **BigCommerce Catalog API v3** (prodotti, immagini, channel assignments)
 - **LearnWorlds API** (voucher)
 - **Google Sheets gviz** (log post-purchase)
+- **Supabase Auth** (Google SSO, @supabase/ssr)
 - **Zod** (validazione input)
