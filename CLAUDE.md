@@ -145,3 +145,9 @@ npm install
 npm run dev          # Dev server
 npx next build       # Production build (verifica TypeScript)
 ```
+
+## Deploy (Replit)
+- **Build command**: `npm run build && cp -r .next/static .next/standalone/.next/static`
+- **Run command**: `HOSTNAME=0.0.0.0 node .next/standalone/server.js`
+- **URL**: `https://n-8-n-ops-dashboard.replit.app`
+- Auto-deploy via GitHub integration (push to main → rebuild + republish)
