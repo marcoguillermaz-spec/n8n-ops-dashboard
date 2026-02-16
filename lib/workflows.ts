@@ -1,5 +1,5 @@
 /**
- * Static registry of the two BRT shipping workflows.
+ * Static registry of monitored n8n workflows.
  *
  * IDs match your n8n instance.  Update here if they ever change.
  */
@@ -9,7 +9,7 @@ export interface WorkflowMeta {
   label: string;
   description: string;
   schedule: string;
-  direction: 'in' | 'out';
+  direction: 'in' | 'out' | 'feed';
   color: string;        // Tailwind ring/accent color class
 }
 
@@ -31,5 +31,32 @@ export const WORKFLOWS: WorkflowMeta[] = [
     schedule: 'Ogni 30 minuti',
     direction: 'out',
     color: 'emerald',
+  },
+  {
+    id: 'BvAUzuIZmdNUCEm5',
+    label: 'LW Post-purchase',
+    description:
+      'Automazione post-purchase LearnWorlds: creazione utente, enrollment corsi, tag assegnazione e logging.',
+    schedule: 'Ad ogni nuovo ordine LW',
+    direction: 'feed',
+    color: 'cyan',
+  },
+  {
+    id: 'PUynBiE4NJTnvURn',
+    label: 'Catalogue Feed',
+    description:
+      'Genera e aggiorna i feed prodotti Google Merchant e AWIN per tutti i brand a partire dal catalogo BigCommerce.',
+    schedule: 'Ad ogni create/update/delete prodotto',
+    direction: 'feed',
+    color: 'violet',
+  },
+  {
+    id: 'M5F9iJgrmu3FsVBq',
+    label: 'Tutoring Post-purchase',
+    description:
+      'Automazione post-purchase per tutoring: assegnazione tutor, notifiche e aggiornamento GSheet multi-tab.',
+    schedule: 'Ad ogni nuovo ordine tutoring',
+    direction: 'feed',
+    color: 'amber',
   },
 ];

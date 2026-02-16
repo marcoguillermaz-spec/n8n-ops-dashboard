@@ -29,11 +29,31 @@ Ricerca quale bundle contiene un dato SKU sub-prodotto. Indice in-memory costrui
 #### Coupon Management
 Gestione promozioni e codici coupon BigCommerce: lista promozioni, creazione, generazione codici.
 
+#### Verifica Buono Carta Cultura / Carta Docente
+Verifica validità, beneficiario e importo di un buono senza consumarlo (sola lettura). Comunicazione diretta con servizio SOAP Sogei tramite mTLS. Supporta Carta Cultura Giovani e Carta del Docente.
+
 #### Convalida Buono-Ordine Carta Cultura / Carta Docente
 Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono e Order ID.
 
 #### Cache Flush (Revalidate)
 Invalidazione on-demand della cache Next.js sui siti di produzione e staging. Supporta flush per path relativo o per SKU, con selezione brand (Testbusters, Peer4med, Topsquad, Medschool) e ambiente (Produzione/Staging).
+
+### Catalogue Feed
+- **Visualizzazione feed** prodotti Google Merchant e AWIN per 4 brand (Testbusters, Peer4med, Topsquad, Medschool)
+- **8 Google Sheets** (4 brand × 2 provider) letti via gviz
+- **Paginazione** a 50 risultati per pagina con navigazione
+- **Rilevamento errori** automatico per righe con valori assenti
+- **Toggle workflow** n8n "Catalogue Feed • Workflow" con modale conferma
+- **Storico esecuzioni** con polling ogni 30 secondi
+- **Guida utente** completa per abilitazione/disabilitazione prodotti nei feed
+
+### Tutoring
+- **Monitoraggio workflow** n8n "Tutoring • Post purchase automation" con toggle e storico esecuzioni
+- **3 sheet** dati tutoring (Testbusters, Topsquad, Medschool) da Google Sheet multi-tab
+- **12 colonne** per sheet (Product Line → Assegnazione Tutor)
+- **Paginazione** a 50 risultati per pagina
+- **Rilevamento errori** automatico per righe con valori assenti
+- **Layout accordion** collapsible (Monitoraggio + Dati)
 
 ### AI Knowledge Base
 - **Chat interattiva** con la knowledge base aziendale (Pinecone via RAG)
@@ -72,6 +92,8 @@ Apri [http://localhost:3000](http://localhost:3000).
 | `LW_API_KEY` | API key LearnWorlds (per voucher) |
 | `LW_SCHOOL_URL` | URL scuola LearnWorlds |
 | `N8N_KB_WEBHOOK_URL` | Webhook URL workflow n8n KB Ask FAQ |
+| `SOGEI_CERT_PATH` | Path certificato PEM per mTLS Sogei |
+| `SOGEI_CERT_PASSPHRASE` | Passphrase certificato Sogei |
 
 > **Nota:** Il Google Sheet deve essere condiviso come "Chiunque abbia il link" per il funzionamento dell'endpoint gviz.
 

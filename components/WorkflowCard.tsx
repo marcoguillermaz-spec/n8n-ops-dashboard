@@ -7,7 +7,7 @@ interface WorkflowCardProps {
   label: string;
   description: string;
   schedule: string;
-  direction: 'in' | 'out';
+  direction: 'in' | 'out' | 'feed';
   color: string;
   active: boolean;
   updatedAt: string;
@@ -31,8 +31,8 @@ export default function WorkflowCard({
   const [toggling, setToggling] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const dirIcon = direction === 'in' ? '⬆️' : '⬇️';
-  const dirLabel = direction === 'in' ? 'INVIO A BRT' : 'RICEZIONE DA BRT';
+  const dirIcon = direction === 'feed' ? '📡' : direction === 'in' ? '⬆️' : '⬇️';
+  const dirLabel = direction === 'feed' ? 'GENERAZIONE FEED' : direction === 'in' ? 'INVIO A BRT' : 'RICEZIONE DA BRT';
 
   const borderColor = selected
     ? 'border-blue-500'

@@ -48,8 +48,11 @@ app/
     ecom/coupon/codes/route.ts             → POST creazione codici coupon
     ecom/coupon/codes/[promotionId]/route.ts → GET codici per promozione
     ecom/cache-flush/route.ts                → POST cache flush (revalidate) proxy
+    ecom/carta-verify/route.ts               → POST verifica buono Carta Cultura/Docente (SOAP Sogei)
+    catalogue-feed/products/route.ts         → GET prodotti feed da GSheet (brand + provider)
+    tutoring/data/route.ts                   → GET dati tutoring da GSheet multi-tab (gid)
     kb/chat/route.ts                         → POST chat AI Knowledge Base (proxy webhook n8n)
-  page.tsx                                 → Dashboard principale (4 tab)
+  page.tsx                                 → Dashboard principale (6 tab)
   login/page.tsx                           → Login (Google SSO + Suspense boundary)
   layout.tsx                               → Layout root
   globals.css                              → Tailwind base
@@ -61,6 +64,7 @@ components/
   LWSummaryCards.tsx        → Cards riassuntive LW (cliccabili)
   LWIssuesTable.tsx         → Tabella issues per severity (OK/WARNING/ERROR)
   LWDetailTable.tsx         → Tabella dettaglio operazione
+  LWWorkflowPanel.tsx       → Accordion workflow LW (toggle + esecuzioni)
   LWSection.tsx             → Container sezione LW (sub-tab: Summary, Issues, Errors, Detail)
   EcomSection.tsx           → Container eCommerce Utils (sub-tab)
   EcomSkuInput.tsx          → Input SKU singolo/bulk + CSV upload
@@ -68,13 +72,20 @@ components/
   EcomDetailModal.tsx       → Modal dettaglio con griglia check
   EcomCheckBadge.tsx        → Badge singolo check (pass/fail)
   EcomValidationGuide.tsx   → CTA + dialog guida con 11+8 check
-  EcomVoucherSection.tsx    → Convalida buono-ordine Carta Cultura / Carta Docente
+  EcomVoucherSection.tsx    → Verifica + Convalida buono Carta Cultura / Carta Docente
   EcomBundleLookup.tsx      → Ricerca inversa SKU bundle
   EcomCouponSection.tsx     → Container gestione coupon
   EcomCouponList.tsx        → Lista promozioni BigCommerce
   EcomCouponCodeGen.tsx     → Generazione codici coupon
   EcomCouponUpload.tsx      → Upload coupon
   EcomCacheFlushSection.tsx → Cache flush (revalidate) per brand/ambiente
+  CatFeedSection.tsx        → Container sezione Catalogue Feed (sub-tab + brand selector)
+  CatFeedProductTable.tsx   → Tabella prodotti feed read-only con paginazione
+  CatFeedWorkflowPanel.tsx  → Toggle workflow + esecuzioni Catalogue Feed
+  CatFeedGuide.tsx          → CTA + modale guida gestione feed catalogo
+  TutoringSection.tsx       → Container sezione Tutoring (2 accordion)
+  TutoringWorkflowPanel.tsx → Accordion workflow tutoring (toggle + esecuzioni)
+  TutoringDataTable.tsx     → Tabella dati tutoring con sub-tab per sheet + paginazione
   KBSection.tsx             → Container sezione AI Knowledge Base (state owner chat)
   KBMessageList.tsx         → Lista messaggi chat con auto-scroll e typing indicator
   KBChatInput.tsx           → Textarea auto-resize con invio messaggio
@@ -90,8 +101,11 @@ lib/
   ecom-storage.ts        → In-memory storage risultati + tipi (globalThis singleton)
   ecom-schemas.ts        → Schema Zod per voucher
   ecom-coupon.ts         → Client BigCommerce coupon/promotions API
-  ecom-bundle-index.ts   → Indice bundle per ricerca inversa SKU
-  kb-types.ts            → Tipi TypeScript per chat AI Knowledge Base
+  ecom-bundle-index.ts        → Indice bundle per ricerca inversa SKU
+  sogei-client.ts             → Client SOAP mTLS per verifica buoni Sogei (Carta Cultura/Docente)
+  catalogue-feed-config.ts    → Config feed catalogo (sheet IDs, colonne, brand/provider types)
+  tutoring-config.ts          → Config tutoring (sheet ID, gid tab, colonne A–L)
+  kb-types.ts                 → Tipi TypeScript per chat AI Knowledge Base
 
 middleware.ts            → Supabase Auth middleware (getUser + domain check + x-forwarded-host)
 next.config.js           → Next.js config (output: 'standalone')
@@ -126,13 +140,22 @@ Ricerca quale bundle contiene un dato SKU sub-prodotto. Usa indice in-memory cos
 #### Coupon Management
 Gestione promozioni e codici coupon BigCommerce: lista, creazione, generazione codici.
 
+#### Verifica Buono Carta Cultura / Carta Docente
+Verifica validità, beneficiario e importo di un buono senza consumarlo (operazione di sola lettura, tipoOperazione=1). Comunicazione diretta con servizio SOAP Sogei tramite mTLS (`certs/certificato.pem`). Supporta sia Carta Cultura Giovani che Carta del Docente con endpoint dedicati.
+
 #### Convalida Buono-Ordine Carta Cultura / Carta Docente
 Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono (8 char alfanumerici) e Order ID. Proxy verso `testbusters.it/api/vouchers/create` + webhook ordine.
 
 #### Cache Flush (Revalidate)
 Invalidazione on-demand della cache Next.js sui siti di produzione/staging. Supporta flush per path relativo o per SKU. 4 brand (Testbusters, Peer4med, Topsquad, Medschool) × 2 ambienti (Produzione, Staging). Endpoint target: `GET {baseUrl}/api/revalidate?path={value}` o `?sku={value}`.
 
-### 4. AI Knowledge Base
+### 4. Catalogue Feed
+Visualizzazione feed prodotti Google Merchant e AWIN per 4 brand (Testbusters, Peer4med, Topsquad, Medschool). Dati letti da 8 Google Sheets (4 brand × 2 provider) via gviz. Colonne visualizzate: SKU e Nome prodotto. Paginazione a 50 risultati per pagina. Rilevamento automatico valori assenti con banner errore. Toggle workflow n8n "Catalogue Feed • Workflow" con storico esecuzioni. Guida utente completa per gestione abilitazione/disabilitazione prodotti nei feed.
+
+### 5. Tutoring
+Monitoraggio e gestione del workflow n8n "Tutoring • Post purchase automation" con toggle on/off e storico esecuzioni. Visualizzazione dati da Google Sheet multi-tab (3 tab: Testbusters Docente privato, Topsquad Docente privato, Medschool tutoring). Colonne A–L (Product Line, Prodotto, SKU, Data Ordine, # Ordine, Città, Email, Telefono, Nome, Cognome, Ore, Assegnazione Tutor). Paginazione a 50 risultati per pagina. Layout a 2 accordion (Monitoraggio + Dati).
+
+### 6. AI Knowledge Base
 Interfaccia chat per interrogare la knowledge base aziendale (Pinecone) tramite RAG (OpenAI + fallback Perplexity). Proxy verso workflow n8n "KB • Ask FAQ" via webhook. Sessione client-side (persa al refresh), nessuna gestione KB.
 
 ## Environment Variables
@@ -148,6 +171,8 @@ BC_API_KEY                     → Access token API BigCommerce (V3 Catalog)
 LW_API_KEY                     → API key LearnWorlds (per voucher)
 LW_SCHOOL_URL                  → URL scuola LearnWorlds
 N8N_KB_WEBHOOK_URL             → Webhook URL workflow n8n KB Ask FAQ
+SOGEI_CERT_PATH                → Path certificato PEM per mTLS Sogei (default: certs/certificato.pem)
+SOGEI_CERT_PASSPHRASE          → Passphrase certificato Sogei
 ```
 
 ## Coding Conventions

@@ -7,6 +7,8 @@ import ExecutionTable from '@/components/ExecutionTable';
 import LWSection from '@/components/LWSection';
 import EcomSection from '@/components/EcomSection';
 import KBSection from '@/components/KBSection';
+import CatFeedSection from '@/components/CatFeedSection';
+import TutoringSection from '@/components/TutoringSection';
 import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ───────────────────────────────────────── */
@@ -16,7 +18,7 @@ interface WorkflowState {
   label: string;
   description: string;
   schedule: string;
-  direction: 'in' | 'out';
+  direction: 'in' | 'out' | 'feed';
   color: string;
   active: boolean;
   updatedAt: string;
@@ -37,6 +39,8 @@ const TABS = [
   { id: 'ecom', label: 'eCommerce Utils', icon: '🛒' },
   { id: 'shipping', label: 'Shipping', icon: '📦' },
   { id: 'lw', label: 'LearnWorlds', icon: '🎓' },
+  { id: 'catalogue', label: 'Catalogue Feed', icon: '📡' },
+  { id: 'tutoring', label: 'Tutoring', icon: '🎓' },
   { id: 'kb', label: 'AI Knowledge Base', icon: '🧠' },
 ];
 
@@ -192,15 +196,17 @@ export default function DashboardPage() {
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
-                {workflows.map((wf) => (
-                  <WorkflowCard
-                    key={wf.id}
-                    {...wf}
-                    onToggle={handleToggle}
-                    onSelect={setSelectedId}
-                    selected={wf.id === selectedId}
-                  />
-                ))}
+                {workflows
+                  .filter((wf) => wf.direction === 'in' || wf.direction === 'out')
+                  .map((wf) => (
+                    <WorkflowCard
+                      key={wf.id}
+                      {...wf}
+                      onToggle={handleToggle}
+                      onSelect={setSelectedId}
+                      selected={wf.id === selectedId}
+                    />
+                  ))}
               </div>
 
               {selectedWf && (
@@ -225,6 +231,12 @@ export default function DashboardPage() {
 
       {/* ━━ ECOMMERCE UTILS TAB ━━━━━━━━━━━━━━━━━ */}
       {activeTab === 'ecom' && <EcomSection />}
+
+      {/* ━━ CATALOGUE FEED TAB ━━━━━━━━━━━━━━━━━━ */}
+      {activeTab === 'catalogue' && <CatFeedSection />}
+
+      {/* ━━ TUTORING TAB ━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {activeTab === 'tutoring' && <TutoringSection />}
 
       {/* ━━ AI KNOWLEDGE BASE TAB ━━━━━━━━━━━━━━━ */}
       {activeTab === 'kb' && <KBSection />}

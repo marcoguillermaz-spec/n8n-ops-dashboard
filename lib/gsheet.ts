@@ -12,6 +12,7 @@ interface GvizQueryOptions {
   sheetId: string;
   query: string;            // Google Visualization SQL-like query
   sheetName?: string;       // tab name (defaults to first sheet)
+  gid?: string;             // numeric tab id (alternative to sheetName)
 }
 
 /**
@@ -24,6 +25,7 @@ export async function gvizQuery(opts: GvizQueryOptions): Promise<string[][]> {
     tq: opts.query,
   });
   if (opts.sheetName) params.set('sheet', opts.sheetName);
+  if (opts.gid) params.set('gid', opts.gid);
 
   const url = `${GVIZ_BASE}/${opts.sheetId}/gviz/tq?${params}`;
 

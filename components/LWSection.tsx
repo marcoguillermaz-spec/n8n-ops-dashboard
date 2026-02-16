@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import LWSummaryCards from './LWSummaryCards';
 import LWDetailTable from './LWDetailTable';
 import LWIssuesTable from './LWIssuesTable';
+import LWWorkflowPanel from './LWWorkflowPanel';
 
 interface ByAction {
   [action: string]: { ok: number; warning: number; error: number };
@@ -60,6 +61,9 @@ export default function LWSection() {
 
   return (
     <div className="space-y-8">
+      {/* ── Workflow accordion ────────────────────── */}
+      <LWWorkflowPanel />
+
       {/* ── Time filter ───────────────────────────── */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">LearnWorlds</h2>
