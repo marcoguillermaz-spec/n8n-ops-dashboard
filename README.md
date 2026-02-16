@@ -29,8 +29,8 @@ Ricerca quale bundle contiene un dato SKU sub-prodotto. Indice in-memory costrui
 #### Coupon Management
 Gestione promozioni e codici coupon BigCommerce: lista promozioni, creazione, generazione codici.
 
-#### Voucher
-Creazione coupon LearnWorlds con validazione Zod dei parametri.
+#### Convalida Buono-Ordine Carta Cultura / Carta Docente
+Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono e Order ID.
 
 ### AI Knowledge Base
 - **Chat interattiva** con la knowledge base aziendale (Pinecone via RAG)

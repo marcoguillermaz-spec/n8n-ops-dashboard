@@ -13,7 +13,7 @@ import type { ValidationResult } from '@/lib/ecom-storage';
 
 const SUB_TABS = [
   { id: 'coupon', label: 'Creazione Coupon', icon: '🎟️' },
-  { id: 'voucher', label: 'Coupon ordine', icon: '🎁' },
+  { id: 'voucher', label: 'Convalida Buono-Ordine CC e CD', icon: '🏛️' },
   { id: 'validation', label: 'Validazione SKU', icon: '🔍' },
   { id: 'bundle-lookup', label: 'Ricerca inversa SKU Bundle', icon: '📦' },
 ] as const;

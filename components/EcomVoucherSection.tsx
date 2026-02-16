@@ -47,20 +47,20 @@ export default function EcomVoucherSection() {
       <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
         <div className="mb-5">
           <h2 className="text-base font-semibold text-gray-100 flex items-center gap-2">
-            🎁 Applica Voucher all&apos;Ordine
+            🏛️ Convalida Buono-Ordine Carta Cultura / Carta Docente
           </h2>
           <p className="text-xs text-gray-400 mt-0.5">
-            Inserisci un codice voucher e l&apos;ID ordine per applicare il voucher
+            Inserisci il codice buono e l&apos;ID ordine per convalidare il buono Carta Cultura o Carta Docente
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Voucher Code</label>
+              <label className="block text-xs text-gray-400 mb-1.5">Codice Buono</label>
               <input
                 type="text"
-                placeholder="Inserisci codice voucher"
+                placeholder="Inserisci codice buono (8 caratteri)"
                 value={voucherCode}
                 onChange={(e) => setVoucherCode(e.target.value)}
                 disabled={submitting}
@@ -97,7 +97,7 @@ export default function EcomVoucherSection() {
                   Applicando…
                 </>
               ) : (
-                '✈ Applica Voucher'
+                '✈ Convalida Buono'
               )}
             </button>
           </div>
@@ -119,21 +119,22 @@ export default function EcomVoucherSection() {
 
       {/* ── Instructions card ──────────────────────── */}
       <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
-        <h3 className="text-base font-semibold text-gray-100 mb-1">Istruzioni Voucher</h3>
-        <p className="text-xs text-gray-400 mb-4">Come funziona il sistema voucher</p>
+        <h3 className="text-base font-semibold text-gray-100 mb-1">Istruzioni</h3>
+        <p className="text-xs text-gray-400 mb-4">Come funziona la convalida buono Carta Cultura e Carta Docente</p>
 
         <div className="space-y-3 text-sm text-gray-400">
           <p>
-            <span className="font-medium text-gray-200">Voucher Code:</span>{' '}
-            Inserisci il codice univoco del voucher da applicare all&apos;ordine.
+            <span className="font-medium text-gray-200">Codice Buono:</span>{' '}
+            Il codice a 8 caratteri alfanumerici generato dal beneficiario su cartadeldocente.istruzione.it o cartacultura.gov.it.
           </p>
           <p>
             <span className="font-medium text-gray-200">Order ID:</span>{' '}
-            Inserisci l&apos;ID dell&apos;ordine a cui applicare il voucher. Deve essere un identificativo ordine valido.
+            L&apos;ID dell&apos;ordine BigCommerce a cui associare il buono.
           </p>
           <p>
             <span className="font-medium text-gray-200">Processo:</span>{' '}
-            Il sistema invierà il voucher e le informazioni dell&apos;ordine alle API esterne per l&apos;elaborazione.
+            Il sistema convalida il buono tramite il servizio SOAP del Ministero (Sogei) e lo associa all&apos;ordine.
+            Lo stesso endpoint gestisce sia Carta della Cultura Giovani che Carta del Docente.
           </p>
         </div>
       </div>

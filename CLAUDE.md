@@ -39,7 +39,7 @@ app/
     ecom/validate-skus/route.ts            → POST validazione batch SKU
     ecom/validation-results/route.ts       → GET/DELETE lista risultati
     ecom/validation-results/[id]/route.ts  → GET/DELETE singolo risultato
-    ecom/voucher/route.ts                  → POST creazione voucher LW
+    ecom/voucher/route.ts                  → POST convalida buono Carta Cultura/Docente
     ecom/bundle-index/build/route.ts       → POST build indice bundle
     ecom/bundle-index/status/route.ts      → GET stato indice bundle
     ecom/bundle-lookup/route.ts            → GET ricerca inversa SKU bundle
@@ -67,7 +67,7 @@ components/
   EcomDetailModal.tsx       → Modal dettaglio con griglia check
   EcomCheckBadge.tsx        → Badge singolo check (pass/fail)
   EcomValidationGuide.tsx   → CTA + dialog guida con 11+8 check
-  EcomVoucherSection.tsx    → Form creazione voucher LearnWorlds
+  EcomVoucherSection.tsx    → Convalida buono-ordine Carta Cultura / Carta Docente
   EcomBundleLookup.tsx      → Ricerca inversa SKU bundle
   EcomCouponSection.tsx     → Container gestione coupon
   EcomCouponList.tsx        → Lista promozioni BigCommerce
@@ -93,6 +93,8 @@ lib/
 
 middleware.ts            → Supabase Auth middleware (getUser + domain check + x-forwarded-host)
 next.config.js           → Next.js config (output: 'standalone')
+.replit                  → Replit deployment config (build + run commands)
+replit.nix               → Nix environment (Node.js 20)
 ```
 
 ## Sections
@@ -122,8 +124,8 @@ Ricerca quale bundle contiene un dato SKU sub-prodotto. Usa indice in-memory cos
 #### Coupon Management
 Gestione promozioni e codici coupon BigCommerce: lista, creazione, generazione codici.
 
-#### Voucher
-Creazione coupon LearnWorlds con validazione Zod.
+#### Convalida Buono-Ordine Carta Cultura / Carta Docente
+Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono (8 char alfanumerici) e Order ID. Proxy verso `testbusters.it/api/vouchers/create` + webhook ordine.
 
 ### 4. AI Knowledge Base
 Interfaccia chat per interrogare la knowledge base aziendale (Pinecone) tramite RAG (OpenAI + fallback Perplexity). Proxy verso workflow n8n "KB • Ask FAQ" via webhook. Sessione client-side (persa al refresh), nessuna gestione KB.
@@ -177,7 +179,9 @@ npx next build       # Production build (verifica TypeScript)
 ```
 
 ## Deploy (Replit)
-- **Build command**: `npm run build && cp -r .next/static .next/standalone/.next/static`
+- **Config files**: `.replit` + `replit.nix` (committati nel repo)
+- **Build command**: `npm install && npm run build && cp -r .next/static .next/standalone/.next/static`
 - **Run command**: `HOSTNAME=0.0.0.0 node .next/standalone/server.js`
 - **URL**: `https://n-8-n-ops-dashboard.replit.app`
+- **Repo**: privato su GitHub, Replit accede via integrazione Git
 - Deploy manuale: push to GitHub → su Replit "Pull latest from GitHub and republish"
