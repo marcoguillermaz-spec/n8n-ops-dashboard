@@ -32,6 +32,11 @@ Gestione promozioni e codici coupon BigCommerce: lista promozioni, creazione, ge
 #### Voucher
 Creazione coupon LearnWorlds con validazione Zod dei parametri.
 
+### AI Knowledge Base
+- **Chat interattiva** con la knowledge base aziendale (Pinecone via RAG)
+- **Multi-turn**: contesto conversazione mantenuto nella sessione (perso al refresh)
+- **Backend**: proxy verso workflow n8n "KB • Ask FAQ" (OpenAI + fallback Perplexity)
+
 ## Funzionalità trasversali
 - **Autenticazione** con Google SSO via Supabase (solo account @testbusters.it)
 - **Auto-refresh** ogni 30 secondi
@@ -63,6 +68,7 @@ Apri [http://localhost:3000](http://localhost:3000).
 | `BC_API_KEY` | Access token API BigCommerce (V3 Catalog) |
 | `LW_API_KEY` | API key LearnWorlds (per voucher) |
 | `LW_SCHOOL_URL` | URL scuola LearnWorlds |
+| `N8N_KB_WEBHOOK_URL` | Webhook URL workflow n8n KB Ask FAQ |
 
 > **Nota:** Il Google Sheet deve essere condiviso come "Chiunque abbia il link" per il funzionamento dell'endpoint gviz.
 

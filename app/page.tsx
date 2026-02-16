@@ -6,6 +6,7 @@ import WorkflowCard from '@/components/WorkflowCard';
 import ExecutionTable from '@/components/ExecutionTable';
 import LWSection from '@/components/LWSection';
 import EcomSection from '@/components/EcomSection';
+import KBSection from '@/components/KBSection';
 import { createClient } from '@/lib/supabase/client';
 
 /* ── Types ───────────────────────────────────────── */
@@ -36,6 +37,7 @@ const TABS = [
   { id: 'ecom', label: 'eCommerce Utils', icon: '🛒' },
   { id: 'shipping', label: 'Shipping', icon: '📦' },
   { id: 'lw', label: 'LearnWorlds', icon: '🎓' },
+  { id: 'kb', label: 'AI Knowledge Base', icon: '🧠' },
 ];
 
 const POLL_INTERVAL = 30_000;
@@ -223,6 +225,9 @@ export default function DashboardPage() {
 
       {/* ━━ ECOMMERCE UTILS TAB ━━━━━━━━━━━━━━━━━ */}
       {activeTab === 'ecom' && <EcomSection />}
+
+      {/* ━━ AI KNOWLEDGE BASE TAB ━━━━━━━━━━━━━━━ */}
+      {activeTab === 'kb' && <KBSection />}
     </div>
   );
 }

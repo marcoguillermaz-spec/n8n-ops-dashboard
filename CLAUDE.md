@@ -47,7 +47,8 @@ app/
     ecom/coupon/promotion/[id]/route.ts    → GET/DELETE singola promozione
     ecom/coupon/codes/route.ts             → POST creazione codici coupon
     ecom/coupon/codes/[promotionId]/route.ts → GET codici per promozione
-  page.tsx                                 → Dashboard principale (3 tab)
+    kb/chat/route.ts                         → POST chat AI Knowledge Base (proxy webhook n8n)
+  page.tsx                                 → Dashboard principale (4 tab)
   login/page.tsx                           → Login (Google SSO + Suspense boundary)
   layout.tsx                               → Layout root
   globals.css                              → Tailwind base
@@ -72,6 +73,9 @@ components/
   EcomCouponList.tsx        → Lista promozioni BigCommerce
   EcomCouponCodeGen.tsx     → Generazione codici coupon
   EcomCouponUpload.tsx      → Upload coupon
+  KBSection.tsx             → Container sezione AI Knowledge Base (state owner chat)
+  KBMessageList.tsx         → Lista messaggi chat con auto-scroll e typing indicator
+  KBChatInput.tsx           → Textarea auto-resize con invio messaggio
 
 lib/
   supabase/client.ts     → Browser Supabase client (createBrowserClient)
@@ -85,6 +89,7 @@ lib/
   ecom-schemas.ts        → Schema Zod per voucher
   ecom-coupon.ts         → Client BigCommerce coupon/promotions API
   ecom-bundle-index.ts   → Indice bundle per ricerca inversa SKU
+  kb-types.ts            → Tipi TypeScript per chat AI Knowledge Base
 
 middleware.ts            → Supabase Auth middleware (getUser + domain check + x-forwarded-host)
 next.config.js           → Next.js config (output: 'standalone')
@@ -120,6 +125,9 @@ Gestione promozioni e codici coupon BigCommerce: lista, creazione, generazione c
 #### Voucher
 Creazione coupon LearnWorlds con validazione Zod.
 
+### 4. AI Knowledge Base
+Interfaccia chat per interrogare la knowledge base aziendale (Pinecone) tramite RAG (OpenAI + fallback Perplexity). Proxy verso workflow n8n "KB • Ask FAQ" via webhook. Sessione client-side (persa al refresh), nessuna gestione KB.
+
 ## Environment Variables
 ```
 NEXT_PUBLIC_SUPABASE_URL       → Supabase project URL
@@ -132,6 +140,7 @@ BC_STORE_HASH                  → Store hash BigCommerce
 BC_API_KEY                     → Access token API BigCommerce (V3 Catalog)
 LW_API_KEY                     → API key LearnWorlds (per voucher)
 LW_SCHOOL_URL                  → URL scuola LearnWorlds
+N8N_KB_WEBHOOK_URL             → Webhook URL workflow n8n KB Ask FAQ
 ```
 
 ## Coding Conventions
