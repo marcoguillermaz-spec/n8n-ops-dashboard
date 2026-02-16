@@ -47,6 +47,7 @@ app/
     ecom/coupon/promotion/[id]/route.ts    → GET/DELETE singola promozione
     ecom/coupon/codes/route.ts             → POST creazione codici coupon
     ecom/coupon/codes/[promotionId]/route.ts → GET codici per promozione
+    ecom/cache-flush/route.ts                → POST cache flush (revalidate) proxy
     kb/chat/route.ts                         → POST chat AI Knowledge Base (proxy webhook n8n)
   page.tsx                                 → Dashboard principale (4 tab)
   login/page.tsx                           → Login (Google SSO + Suspense boundary)
@@ -73,6 +74,7 @@ components/
   EcomCouponList.tsx        → Lista promozioni BigCommerce
   EcomCouponCodeGen.tsx     → Generazione codici coupon
   EcomCouponUpload.tsx      → Upload coupon
+  EcomCacheFlushSection.tsx → Cache flush (revalidate) per brand/ambiente
   KBSection.tsx             → Container sezione AI Knowledge Base (state owner chat)
   KBMessageList.tsx         → Lista messaggi chat con auto-scroll e typing indicator
   KBChatInput.tsx           → Textarea auto-resize con invio messaggio
@@ -126,6 +128,9 @@ Gestione promozioni e codici coupon BigCommerce: lista, creazione, generazione c
 
 #### Convalida Buono-Ordine Carta Cultura / Carta Docente
 Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono (8 char alfanumerici) e Order ID. Proxy verso `testbusters.it/api/vouchers/create` + webhook ordine.
+
+#### Cache Flush (Revalidate)
+Invalidazione on-demand della cache Next.js sui siti di produzione/staging. Supporta flush per path relativo o per SKU. 4 brand (Testbusters, Peer4med, Topsquad, Medschool) × 2 ambienti (Produzione, Staging). Endpoint target: `GET {baseUrl}/api/revalidate?path={value}` o `?sku={value}`.
 
 ### 4. AI Knowledge Base
 Interfaccia chat per interrogare la knowledge base aziendale (Pinecone) tramite RAG (OpenAI + fallback Perplexity). Proxy verso workflow n8n "KB • Ask FAQ" via webhook. Sessione client-side (persa al refresh), nessuna gestione KB.

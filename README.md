@@ -32,6 +32,9 @@ Gestione promozioni e codici coupon BigCommerce: lista promozioni, creazione, ge
 #### Convalida Buono-Ordine Carta Cultura / Carta Docente
 Convalida buoni Carta della Cultura Giovani e Carta del Docente associandoli a un ordine BigCommerce. Richiede codice buono e Order ID.
 
+#### Cache Flush (Revalidate)
+Invalidazione on-demand della cache Next.js sui siti di produzione e staging. Supporta flush per path relativo o per SKU, con selezione brand (Testbusters, Peer4med, Topsquad, Medschool) e ambiente (Produzione/Staging).
+
 ### AI Knowledge Base
 - **Chat interattiva** con la knowledge base aziendale (Pinecone via RAG)
 - **Multi-turn**: contesto conversazione mantenuto nella sessione (perso al refresh)

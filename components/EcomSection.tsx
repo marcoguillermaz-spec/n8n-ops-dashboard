@@ -7,6 +7,7 @@ import EcomDetailModal from './EcomDetailModal';
 import EcomVoucherSection from './EcomVoucherSection';
 import EcomCouponSection from './EcomCouponSection';
 import EcomBundleLookup from './EcomBundleLookup';
+import EcomCacheFlushSection from './EcomCacheFlushSection';
 import type { ValidationResult } from '@/lib/ecom-storage';
 
 /* ── Sub-tabs ─────────────────────────────────────── */
@@ -16,6 +17,7 @@ const SUB_TABS = [
   { id: 'voucher', label: 'Convalida Buono-Ordine CC e CD', icon: '🏛️' },
   { id: 'validation', label: 'Validazione SKU', icon: '🔍' },
   { id: 'bundle-lookup', label: 'Ricerca inversa SKU Bundle', icon: '📦' },
+  { id: 'cache-flush', label: 'Cache Flush', icon: '🔄' },
 ] as const;
 
 type SubTab = (typeof SUB_TABS)[number]['id'];
@@ -127,6 +129,9 @@ export default function EcomSection() {
 
       {/* ━━ BUNDLE LOOKUP ━━━━━━━━━━━━━━━━━━━━━━━━ */}
       {subTab === 'bundle-lookup' && <EcomBundleLookup />}
+
+      {/* ━━ CACHE FLUSH ━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {subTab === 'cache-flush' && <EcomCacheFlushSection />}
     </div>
   );
 }
