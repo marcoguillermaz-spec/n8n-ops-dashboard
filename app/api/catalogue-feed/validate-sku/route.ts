@@ -36,18 +36,21 @@ export async function POST(request: NextRequest) {
   }
 
   const endpoint = process.env.BC_API_ENDPOINT;
+  const storeHash = process.env.BC_STORE_HASH;
   const apiKey = process.env.BC_API_KEY;
 
-  if (!endpoint || !apiKey) {
+  if (!endpoint || !storeHash || !apiKey) {
     return NextResponse.json(
       { success: false, message: 'Credenziali BigCommerce non configurate' },
       { status: 500 }
     );
   }
 
+  const baseUrl = `${endpoint}/${storeHash}/v3/catalog`;
+
   try {
     /* 1 — Fetch product by SKU with images and custom_fields */
-    const res = await axios.get(`${endpoint}/v3/catalog/products`, {
+    const res = await axios.get(`${baseUrl}/products`, {
       headers: bcHeaders(apiKey),
       params: { 'sku:in': sku, include: 'images,custom_fields', limit: 1 },
     });
