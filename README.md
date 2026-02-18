@@ -46,6 +46,7 @@ On-demand Next.js cache invalidation on production/staging sites. Supports flush
 - **Automatic error detection** for rows with missing values
 - **Workflow toggle** for n8n "Catalogue Feed" with confirmation modal
 - **Execution history** with 30-second polling
+- **SKU feed validator**: 7-check validation against feed eligibility rules (visibility, feed_enabled, title, categories, image, description, price)
 - **User guide** for enabling/disabling products in feeds
 
 ### Tutoring
@@ -96,6 +97,7 @@ app/
     ecom/coupon/codes/[promotionId]/route.ts # GET codes for a promotion
     ecom/cache-flush/route.ts                # POST cache flush (revalidate) proxy
     catalogue-feed/products/route.ts         # GET feed products from GSheet
+    catalogue-feed/validate-sku/route.ts     # POST SKU validation for feed (7 checks)
     tutoring/data/route.ts                   # GET tutoring data from GSheet multi-tab
     kb/chat/route.ts                         # POST AI Knowledge Base chat (n8n webhook proxy)
   page.tsx                                   # Main dashboard (6 tabs)
@@ -129,6 +131,7 @@ components/
   CatFeedProductTable.tsx      # Read-only product feed table with pagination
   CatFeedWorkflowPanel.tsx     # Catalogue Feed workflow toggle + executions
   CatFeedGuide.tsx             # Feed management user guide
+  CatFeedSkuValidator.tsx      # SKU feed validation tool (7 checks: visibility, feed_enabled, title, categories, image, description, price)
   TutoringSection.tsx          # Tutoring section (2 accordions)
   TutoringWorkflowPanel.tsx    # Tutoring workflow accordion (toggle + executions)
   TutoringDataTable.tsx        # Tutoring data table with sub-tabs + pagination

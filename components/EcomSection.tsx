@@ -13,11 +13,11 @@ import type { ValidationResult } from '@/lib/ecom-storage';
 /* ── Sub-tabs ─────────────────────────────────────── */
 
 const SUB_TABS = [
-  { id: 'coupon', label: 'Creazione Coupon', icon: '🎟️' },
+  { id: 'coupon', label: 'Creazione massiva codici Coupon', icon: '🎟️' },
   { id: 'voucher', label: 'Convalida Buono-Ordine CC e CD', icon: '🏛️' },
-  { id: 'validation', label: 'Validazione SKU', icon: '🔍' },
-  { id: 'bundle-lookup', label: 'Ricerca inversa SKU Bundle', icon: '📦' },
-  { id: 'cache-flush', label: 'Cache Flush', icon: '🔄' },
+  { id: 'validation', label: 'Validazione configurazione Bundle', icon: '🔍' },
+  { id: 'bundle-lookup', label: 'Ricerca inversa SKU-bundle', icon: '📦' },
+  { id: 'cache-flush', label: 'Cache flush pagina e SKU prodotto', icon: '🔄' },
 ] as const;
 
 type SubTab = (typeof SUB_TABS)[number]['id'];

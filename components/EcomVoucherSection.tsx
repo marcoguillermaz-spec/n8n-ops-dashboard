@@ -143,7 +143,7 @@ export default function EcomVoucherSection() {
               placeholder="Codice 8 caratteri"
               maxLength={8}
               value={verifyCode}
-              onChange={(e) => setVerifyCode(e.target.value.toUpperCase())}
+              onChange={(e) => setVerifyCode(e.target.value)}
               disabled={verifying}
               className={inputCls}
             />

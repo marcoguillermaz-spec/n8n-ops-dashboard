@@ -4,6 +4,7 @@ import { useState } from 'react';
 import CatFeedProductTable from './CatFeedProductTable';
 import CatFeedWorkflowPanel from './CatFeedWorkflowPanel';
 import CatFeedGuide from './CatFeedGuide';
+import CatFeedSkuValidator from './CatFeedSkuValidator';
 import { BRANDS, type Brand, type Provider } from '@/lib/catalogue-feed-config';
 
 /* ── Provider options ───────────────────────────── */
@@ -27,6 +28,9 @@ export default function CatFeedSection() {
 
       {/* ━━ ACCORDION 1 — Monitoraggio Workflow ━━━━━━ */}
       <CatFeedWorkflowPanel />
+
+      {/* ━━ VALIDAZIONE SKU ━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <CatFeedSkuValidator />
 
       {/* ━━ ACCORDION 2 — Esplora Feed ━━━━━━━━━━━━━━ */}
       <div className="rounded-2xl border border-gray-800 bg-gray-900/50">
