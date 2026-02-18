@@ -134,28 +134,14 @@ export async function POST(request: NextRequest) {
       message: desc.length > 0 ? undefined : 'Aggiungere una descrizione al prodotto',
     });
 
-    // Check 7: Prezzo (price > 0; per SKU contenente "COR", cost_price > 0)
-    const isCor = sku.toUpperCase().includes('COR');
-    if (isCor) {
-      const costPrice = parseFloat(p.cost_price ?? '0') || 0;
-      checks.push({
-        name: 'Prezzo (cost_price P4M COR)',
-        status: costPrice > 0 ? 'pass' : 'fail',
-        value: costPrice > 0 ? `€ ${costPrice.toFixed(2)}` : 'Non impostato',
-        message:
-          costPrice > 0
-            ? undefined
-            : 'Per SKU COR il prezzo reale va nel campo cost_price',
-      });
-    } else {
-      const price = parseFloat(p.price ?? '0') || 0;
-      checks.push({
-        name: 'Prezzo',
-        status: price > 0 ? 'pass' : 'fail',
-        value: price > 0 ? `€ ${price.toFixed(2)}` : 'Non impostato',
-        message: price > 0 ? undefined : 'Il prezzo deve essere > 0',
-      });
-    }
+    // Check 7: Prezzo base (price > 0); sale_price opzionale
+    const price = parseFloat(p.price ?? '0') || 0;
+    checks.push({
+      name: 'Prezzo',
+      status: price > 0 ? 'pass' : 'fail',
+      value: price > 0 ? `€ ${price.toFixed(2)}` : 'Non impostato',
+      message: price > 0 ? undefined : 'Il prezzo base (Default Price) deve essere > 0',
+    });
 
     const allPassed = checks.every((c) => c.status === 'pass');
 
