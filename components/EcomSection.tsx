@@ -65,21 +65,23 @@ export default function EcomSection() {
   return (
     <div className="space-y-6">
       {/* ── Sub-tab navigation ────────────────────── */}
-      <div className="flex gap-1 rounded-xl bg-gray-900 border border-gray-800 p-1 w-fit">
-        {SUB_TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setSubTab(t.id)}
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition ${
-              subTab === t.id
-                ? 'bg-gray-800 text-white shadow'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <span>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="flex gap-1 rounded-xl bg-gray-900 border border-gray-800 p-1 w-max min-w-full">
+          {SUB_TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setSubTab(t.id)}
+              className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
+                subTab === t.id
+                  ? 'bg-gray-800 text-white shadow'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <span>{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ━━ SKU VALIDATION ━━━━━━━━━━━━━━━━━━━━━━━━ */}
