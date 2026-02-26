@@ -8,6 +8,8 @@ import EcomVoucherSection from './EcomVoucherSection';
 import EcomCouponSection from './EcomCouponSection';
 import EcomBundleLookup from './EcomBundleLookup';
 import EcomCacheFlushSection from './EcomCacheFlushSection';
+import EcomElliotSection from './EcomElliotSection';
+import EcomMailMigration from './EcomMailMigration';
 import type { ValidationResult } from '@/lib/ecom-storage';
 
 /* ── Sub-tabs ─────────────────────────────────────── */
@@ -18,6 +20,8 @@ const SUB_TABS = [
   { id: 'validation', label: 'Validazione configurazione Bundle', icon: '🔍' },
   { id: 'bundle-lookup', label: 'Ricerca inversa SKU-bundle', icon: '📦' },
   { id: 'cache-flush', label: 'Cache flush pagina e SKU prodotto', icon: '🔄' },
+  { id: 'elliot', label: 'Aggiungi prodotti su Elliot', icon: '🤖' },
+  { id: 'mail-migration', label: 'Cambio mail', icon: '✉️' },
 ] as const;
 
 type SubTab = (typeof SUB_TABS)[number]['id'];
@@ -134,6 +138,12 @@ export default function EcomSection() {
 
       {/* ━━ CACHE FLUSH ━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       {subTab === 'cache-flush' && <EcomCacheFlushSection />}
+
+      {/* ━━ ELLIOT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {subTab === 'elliot' && <EcomElliotSection />}
+
+      {/* ━━ MAIL MIGRATION ━━━━━━━━━━━━━━━━━━━━━ */}
+      {subTab === 'mail-migration' && <EcomMailMigration />}
     </div>
   );
 }

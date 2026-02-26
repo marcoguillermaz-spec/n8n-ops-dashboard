@@ -19,14 +19,30 @@ const ENDPOINTS: Record<CartaType, string> = {
     'https://ws.cartadeldocente.istruzione.it/VerificaVoucherDocWEB/VerificaVoucher',
 };
 
-function buildSoapEnvelope(codiceVoucher: string): string {
-  return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ver="http://bonus.mibact.it/VerificaVoucher/">
+// Namespaces from official WSDLs
+// Cultura: VerificaVoucher_V1.3.wsdl (MIC = Ministero della Cultura, ex MIBACT)
+// Docente: MIUR namespace (verified working)
+const NAMESPACES: Record<CartaType, string> = {
+  cultura: 'http://bonus.mic.it/VerificaVoucher/',
+  docente: 'http://bonus.miur.it/VerificaVoucher/',
+};
+
+// SOAPAction from WSDL binding definitions
+const SOAP_ACTIONS: Record<CartaType, string> = {
+  cultura: 'http://bonus.mic.it/VerificaVoucher/Check',
+  docente: '',
+};
+
+function buildSoapEnvelope(codiceVoucher: string, partitaIvaEsercente: string, tipo: CartaType): string {
+  const ns = NAMESPACES[tipo];
+  return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ver="${ns}">
   <soapenv:Header/>
   <soapenv:Body>
     <ver:CheckRequestObj>
       <checkReq>
         <tipoOperazione>1</tipoOperazione>
         <codiceVoucher>${codiceVoucher}</codiceVoucher>
+        <partitaIvaEsercente>${partitaIvaEsercente}</partitaIvaEsercente>
       </checkReq>
     </ver:CheckRequestObj>
   </soapenv:Body>
@@ -40,10 +56,11 @@ function extractTag(xml: string, tag: string): string {
 }
 
 function extractFault(xml: string): string | null {
+  // Prefer structured exceptionMessage (Carta Cultura MIC format)
+  const exceptionMessage = extractTag(xml, 'exceptionMessage');
+  if (exceptionMessage) return exceptionMessage;
   const faultString = extractTag(xml, 'faultstring');
   if (faultString) return faultString;
-  const detail = extractTag(xml, 'detail');
-  if (detail) return detail;
   return null;
 }
 
@@ -53,9 +70,13 @@ export async function checkVoucher(
 ): Promise<CheckResult> {
   const certPath = process.env.SOGEI_CERT_PATH;
   const passphrase = process.env.SOGEI_CERT_PASSPHRASE;
+  const codiceEsercente = process.env.SOGEI_CODICE_ESERCENTE;
 
   if (!certPath || !passphrase) {
     throw new Error('SOGEI_CERT_PATH e SOGEI_CERT_PASSPHRASE devono essere configurati');
+  }
+  if (!codiceEsercente) {
+    throw new Error('SOGEI_CODICE_ESERCENTE deve essere configurato');
   }
 
   const certFile = fs.readFileSync(path.resolve(certPath));
@@ -67,7 +88,7 @@ export async function checkVoucher(
   });
 
   const endpoint = ENDPOINTS[tipo];
-  const body = buildSoapEnvelope(codiceVoucher);
+  const body = buildSoapEnvelope(codiceVoucher, codiceEsercente, tipo); // codiceEsercente maps to partitaIvaEsercente in WSDL
 
   const response = await new Promise<string>((resolve, reject) => {
     const url = new URL(endpoint);
@@ -79,7 +100,7 @@ export async function checkVoucher(
         agent,
         headers: {
           'Content-Type': 'text/xml; charset=utf-8',
-          SOAPAction: '',
+          SOAPAction: SOAP_ACTIONS[tipo],
           'Content-Length': Buffer.byteLength(body),
         },
       },
